@@ -23,6 +23,7 @@
 #include <time.h>
 #include <mutex>
 #include <queue>
+#include <unistd.h>
 
 using namespace std;
 // Some global variables
@@ -47,14 +48,8 @@ class Intersection{
 		};
 		~Intersection() {};
 		void OpenStreet() 	// Loop to open street
-		{
-			
+		{	
 			printf("Street is open!");
-			while(1)
-			{
-				WaitForCar();
-			}
-
 		} 			
 		void EnterIntersection();	// Called by cars
 
@@ -81,18 +76,23 @@ queue<Car> westqueue;
 
 void ProcessCar(Car c){
 	c.exittime = difftime(timer,time(NULL));
+	return;
 }
 
 void GoCarsGo(queue<Car> a, queue<Car> b){
 	int carCount = 0;
 	while(a.size() != 0 && b.size() != 0 && carCount < MAX_CARS_PASSING){
-		ProcessCar(a.pop());
-		ProcessCar(b.pop());
+		Car c1 = a.front();
+		Car c2 = b.front();
+		ProcessCar(c1);
+		ProcessCar(c2);
+		a.pop();
+		b.pop();a
 		carCount++;
 	}
 }
 
-void *ManageIntersection(){
+void *ManageIntersection(void*){
 	Intersection intersection;
 	while(intersection.passCount < NUM_CARS){
 		// Allow cars in that direction to pass
@@ -100,31 +100,33 @@ void *ManageIntersection(){
 			case 0: 
 				lock(northlock, southlock);
 				GoCarsGo(northqueue, southqueue);
-				unlock(northlock, southlock);
+				northlock.unlock();
+				southlock.unlock();
 				break;
 			case 1:
 				lock(eastlock, westlock);
 				GoCarsGo(eastqueue, westqueue);
-				unlock(eastlock, westlock);
+				eastlock.unlock();
+				westlock.unlaock();
 				break;
 			default:
 				cout << "Bad direction" << endl;
 				break;
 		}
 		// Stop cars in that direction from passings
-		intersection.directionFlag 	~= intersection.directionFlag;
-		sleep(100);
+		intersection.directionFlag = !intersection.directionFlag;
+		usleep(100);
 	}
 	pthread_exit(NULL);
 }
 //lock(mutex1, mutex2)
 void NorthQueueAddCar(Car c){
-	lock(northlock);
+	northlock.lock();
 	northqueue.push(c);
-	unlock(northlock);
+	northlock.unlock();
 }
 
-void *ManageNorth(){
+void *ManageNorth(void*){
 	for(int i = 0; i < CARS_NORTH; i++){
 		Car c;
 		c.direction = 0;
@@ -135,12 +137,12 @@ void *ManageNorth(){
 }
 
 void EastQueueAddCar(Car c){
-	lock(eastlock);
+	eastlock.lock();
 	eastqueue.push(c);
-	unlock(eastlock);
+	eastlock.unlock();
 }
 
-void *ManageEast(){
+void *ManageEast(void*){
 	for(int i = 0; i < CARS_EAST; i++){
 		Car c;
 		c.direction = 0;
@@ -151,12 +153,12 @@ void *ManageEast(){
 }
 
 void SouthQueueAddCar(Car c){
-	lock(southlock);
+	southlock.lock();
 	southqueue.push(c);
-	unlock(southlock);
+	southlock.unlock();
 }
 
-void *ManageSouth(){
+void *ManageSouth(void*){
 	for(int i = 0; i < CARS_SOUTH; i++){
 		Car c;
 		c.direction = 0;
@@ -167,12 +169,12 @@ void *ManageSouth(){
 }
 
 void WestQueueAddCar(Car c){
-	lock(westlock);
+	westlock.lock();
 	westqueue.push(c);
-	unlock(westlock);
+	westlock.unlock();
 }
 
-void *ManageWest(){
+void *ManageWest(void*){
 	for(int i = 0; i < CARS_WEST; i++){
 		Car c;
 		c.direction = 0;
@@ -190,12 +192,12 @@ int main(){
 	time(&timer);
 	std::cout << "Start at time 0" << std::endl;
 	// Create intersection thread and open the street
-	pthread_create(intersectionThread, NULL, ManageIntersection, NULL);
+	pthread_create(&intersectionThread, NULL, ManageIntersection, NULL);
 
 	// Start each car thread after a random sleep time
-	pthread_create(&directionThreads[0], NULL, ManageNorth, NULL);
-	pthread_create(&directionThreads[1], NULL, ManageEast, NULL);
-	pthread_create(&directionThreads[2], NULL, ManageSouth, NULL);
-	pthread_create(&directionThreads[3], NULL, ManageWest, NULL);
+	pthread_create(&directionThreads[0], NULL, &ManageNorth, NULL);
+	pthread_create(&directionThreads[1], NULL, &ManageEast, NULL);
+	pthread_create(&directionThreads[2], NULL, &ManageSouth, NULL);
+	pthread_create(&directionThreads[3], NULL, &ManageWest, NULL);
 	pthread_exit(NULL);
 }
