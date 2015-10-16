@@ -10,7 +10,7 @@
 #define CARS_EAST 15
 #define CARS_SOUTH 15
 #define CARS_WEST 15
-#define MAX_CARS_PASSING 5
+#define MAX_CARS_PASSING 3
 
 // 0: North
 // 1: East
@@ -20,14 +20,14 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <pthread.h>
-#include <time.h>
+#include <ctime>
 #include <mutex>
 #include <queue>
 #include <unistd.h>
 
 using namespace std;
 // Some global variables
-time_t timer;
+clock_t timer;
 mutex northlock;
 mutex eastlock;
 mutex southlock;
@@ -44,7 +44,7 @@ class Intersection{
 
 		Intersection()
 		{
-			OpenStreet();
+			directionFlag = 0;
 		};
 		~Intersection() {};
 		void OpenStreet() 	// Loop to open street
@@ -61,6 +61,7 @@ class Intersection{
 
 class Car{
 	public:
+		int id;
 		int direction;	// North: 0, East: 1, South:2, West: 3
 		int entrytime;
 		int exittime;
@@ -74,22 +75,45 @@ queue<Car> eastqueue;
 queue<Car> southqueue;
 queue<Car> westqueue;
 
-void ProcessCar(Car c){
-	c.exittime = difftime(timer,time(NULL));
+void ProcessCar(Car *c){
+	c->exittime = clock() - timer;
+
+	switch(c->direction){
+		case 0:
+			std::cout << "Car " << c->id << " from the North finised at time " << c->exittime << std::endl;
+			break;
+		case 1:
+			std::cout << "Car " << c->id << " from the  East finised at time " << c->exittime << std::endl;
+			break;
+		case 2:
+			std::cout << "Car " << c->id << " from the  South finised at time " << c->exittime << std::endl;
+			break;
+		case 3:
+			std::cout << "Car " << c->id << " from the  West finised at time " << c->exittime << std::endl;
+			break;
+		default:
+			std::cout << "Not sure where this car came from!" << std::endl;
+			break;
+	}
+
 	return;
 }
 
-void GoCarsGo(queue<Car> a, queue<Car> b){
+void GoCarsGo(Intersection *intersection, queue<Car> *a, queue<Car> *b){
 	int carCount = 0;
-	while(a.size() != 0 && b.size() != 0 && carCount < MAX_CARS_PASSING){
-		Car c1 = a.front();
-		Car c2 = b.front();
-		ProcessCar(c1);
-		ProcessCar(c2);
-		a.pop();
-		b.pop();a
+	while(a->size() != 0 && b->size() != 0 && carCount < MAX_CARS_PASSING){
+		Car c1 = a->front();
+		Car c2 = b->front();
+		ProcessCar(&c1);
+		ProcessCar(&c2);
+		a->pop();
+		intersection->passCount++;
+		b->pop();
+		intersection->passCount++;
+		//cout << "queue a length: " << a.size() << endl;
+		//cout << "queue b lenagth: " << b.size() << endl;
 		carCount++;
-	}
+	} 
 }
 
 void *ManageIntersection(void*){
@@ -99,15 +123,15 @@ void *ManageIntersection(void*){
 		switch(intersection.directionFlag){
 			case 0: 
 				lock(northlock, southlock);
-				GoCarsGo(northqueue, southqueue);
+				GoCarsGo(&intersection, &northqueue, &southqueue);
 				northlock.unlock();
 				southlock.unlock();
 				break;
 			case 1:
 				lock(eastlock, westlock);
-				GoCarsGo(eastqueue, westqueue);
+				GoCarsGo(&intersection, &eastqueue, &westqueue);
 				eastlock.unlock();
-				westlock.unlaock();
+				westlock.unlock();
 				break;
 			default:
 				cout << "Bad direction" << endl;
@@ -115,7 +139,7 @@ void *ManageIntersection(void*){
 		}
 		// Stop cars in that direction from passings
 		intersection.directionFlag = !intersection.directionFlag;
-		usleep(100);
+		usleep(1000);
 	}
 	pthread_exit(NULL);
 }
@@ -130,8 +154,11 @@ void *ManageNorth(void*){
 	for(int i = 0; i < CARS_NORTH; i++){
 		Car c;
 		c.direction = 0;
-		c.entrytime = difftime(timer,time(NULL));
+		c.id = i;
+		c.entrytime = clock() - timer;
+		std::cout << "Car " << i << " in North arrived at time " << c.entrytime << std::endl;
 		NorthQueueAddCar(c);
+		usleep(100);
 	}
 	pthread_exit(NULL);
 }
@@ -145,9 +172,12 @@ void EastQueueAddCar(Car c){
 void *ManageEast(void*){
 	for(int i = 0; i < CARS_EAST; i++){
 		Car c;
-		c.direction = 0;
-		c.entrytime = difftime(timer,time(NULL));
+		c.id = i;
+		c.direction = 1;
+		c.entrytime = clock() - timer;
+		std::cout << "Car " << i << " in East arrived at time " << c.entrytime << std::endl;
 		EastQueueAddCar(c);
+		usleep(100);
 	}
 	pthread_exit(NULL);
 }
@@ -161,9 +191,12 @@ void SouthQueueAddCar(Car c){
 void *ManageSouth(void*){
 	for(int i = 0; i < CARS_SOUTH; i++){
 		Car c;
-		c.direction = 0;
-		c.entrytime = difftime(timer,time(NULL));
+		c.id = i;
+		c.direction = 2;
+		c.entrytime = clock() - timer;
+		std::cout << "Car " << i << " in South arrived at time " << c.entrytime << std::endl;
 		SouthQueueAddCar(c);
+		usleep(100);
 	}
 	pthread_exit(NULL);
 }
@@ -177,9 +210,12 @@ void WestQueueAddCar(Car c){
 void *ManageWest(void*){
 	for(int i = 0; i < CARS_WEST; i++){
 		Car c;
-		c.direction = 0;
-		c.entrytime = difftime(timer,time(NULL));
+		c.id = i;
+		c.direction = 3;
+		c.entrytime = clock() - timer;
+		std::cout << "Car " << i << " in West arrived at time " << c.entrytime << std::endl;
 		WestQueueAddCar(c);
+		usleep(100);
 	}
 	pthread_exit(NULL);
 }
@@ -189,12 +225,14 @@ int main(){
 	pthread_t intersectionThread;
 	pthread_t directionThreads[DIRECTIONS];
 	//Start timer
-	time(&timer);
+	timer = clock();
 	std::cout << "Start at time 0" << std::endl;
 	// Create intersection thread and open the street
+	std::cout << "Create intersection thread" << std::endl;
 	pthread_create(&intersectionThread, NULL, ManageIntersection, NULL);
 
 	// Start each car thread after a random sleep time
+	std::cout << "Create car threads" << std::endl;
 	pthread_create(&directionThreads[0], NULL, &ManageNorth, NULL);
 	pthread_create(&directionThreads[1], NULL, &ManageEast, NULL);
 	pthread_create(&directionThreads[2], NULL, &ManageSouth, NULL);
