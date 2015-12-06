@@ -1,0 +1,126 @@
+Class notes:
+Thread intersection
+loop
+	lock
+	dequeue
+	if just arrived
+		calculate rt
+	else
+		calculate rt
+	print stats
+
+	sleep
+
+rt = max(d/s, tcar - t arrival)) + 3
+
+
+Thread (e,w,n,s)
+loop
+	sim car arrived
+	if so
+		lock
+		push to queue [id, direction, time]
+		unlock
+		...
+		...
+
+		sleep(t)
+
+Personal notes:
+- Nouns
+	- Intersection
+		- Sensor
+		- Queue (stores request to pass cars)
+			- Head of line
+			- Shared by all cars
+	- Cars
+		- Sensor
+		- Direction
+- Verbs
+	- Intersection
+		- Receive notfication of arriving cars
+		- Notify cars in two directions to pass through (opposite directions)
+		- Count cars passing in a direction
+	- Cars
+		- Request to pass (arrive)
+		- drive through intersection
+		- notify intersection when passed through 
+
+- Setup
+- Build list of random cars
+
+- Implementation
+- Intersection
+	- wait for cars to arrive (sleep) (condition alert intersection signal)
+	- receive request to pass from a car (signal from car)
+	- when it is time for the head of the queue to pass, open intersection to opposite directions
+- Car
+	- arrives at the intersection (In queue)  (signal Intersection)
+	- wait to pass through
+	- drive through intersection (3 seconds) (receive lock and run)
+	- leave intersection (Out queue) (signal intesection or next car)
+
+// if(thisDirection % 2 == currentDirection % 2) allowed to pass
+class Car{
+	private:
+		int direction;	// North: 0, East: 1, South: 2, West: 3
+	public:
+		Car(int d){
+			direction = d;
+		}
+	private:
+		void donePassing();
+}
+
+
+class Intersection{
+	private:
+		Lock lock;
+		Cond carsPass;
+
+		Queue<Car> OriginalCars;
+		Queue<Car> ArrivalCars;
+		Queue<Car> DepartureCars;
+		int arrivalCount;
+		int passCount;
+		int passPerGreen; // n can pass per green light
+
+		
+	public:
+		Intersection()
+		{
+			BuildRandomCars();
+			OpenStreet();
+		};
+		~Intersection() {};
+		void OpenStreet() 	// Loop to open street
+		{
+			
+			printf("Street is open!");
+			while(1)
+			{
+				WaitForCar();
+			}
+
+		} 			
+		void EnterIntersection();	// Called by cars
+
+	private:
+		void BuildRandomCars()
+		{
+			// Get random seed (direction of a new car) 
+			// srand(something);
+			sleep(rand());
+			for(int i = 0; i < 50; i++)
+			{
+				OriginalCars.push(new Car(rand()));
+			}
+		}
+		void WaitForCar();
+		void PrintIntersectionStats();
+
+		bool ReachedPassingLimit();
+}
+
+
+bool passThroughIntersection
