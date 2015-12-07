@@ -5,6 +5,7 @@
 */
 
 #define NUM_CARS 50
+#define PASS_PER_GREEN 5
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -24,10 +25,12 @@ class Intersection{
 		private:
 		Lock lock;
 		Cond carsPass;
+		// The name of the queue is the direction the cars are headed
+		Queue<Car> North;
+		Queue<Car> East;
+		Queue<Car> South;
+		Queue<Car> West;
 
-		Queue<Car> OriginalCars;
-		Queue<Car> ArrivalCars;
-		Queue<Car> DepartureCars;
 		int arrivalCount;
 		int passCount;
 		int passPerGreen; // n can pass per green light
