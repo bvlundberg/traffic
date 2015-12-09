@@ -124,3 +124,6 @@ class Intersection{
 
 
 bool passThroughIntersection
+
+Improvements with implementation
+-- allow max length between 2 directions pass. Increased time by 33%
