@@ -10,9 +10,9 @@
 #define CARS_EAST 15
 #define CARS_SOUTH 15
 #define CARS_WEST 15
-#define MAX_CARS_PASSING 5
-#define DRIVE_THROUGH_INTERSECTION 300000
-#define NEW_CAR_SLEEP 300000
+#define MAX_CARS_PASSING 3
+#define INTERSECTION_SLEEP 1000
+#define NEW_CAR_SLEEP 5000
 
 // 0: North
 // 1: East
@@ -30,11 +30,11 @@
 using namespace std;
 // Some global variables
 clock_t timer;
+double globalcounter;
 mutex northlock;
 mutex eastlock;
 mutex southlock;
 mutex westlock;
-
 
 class Intersection{
 	public:
@@ -49,16 +49,6 @@ class Intersection{
 			directionFlag = 0;
 		};
 		~Intersection() {};
-		void OpenStreet() 	// Loop to open street
-		{	
-			printf("Street is open!");
-		} 			
-		void EnterIntersection();	// Called by cars
-
-		void WaitForCar();
-		void PrintIntersectionStats();
-
-		bool ReachedPassingLimit();
 };
 
 class Car{
@@ -68,8 +58,11 @@ class Car{
 		double entrytime;
 		double exittime;
 	
-		Car(){}
-		void donePassing();
+		Car(int i, int d)
+		{
+			id = i;
+			direction = d;
+		}
 };
 
 queue<Car> northqueue;
@@ -78,7 +71,7 @@ queue<Car> southqueue;
 queue<Car> westqueue;
 
 void ProcessCar(Car *c){
-	c->exittime = (clock() - timer) / 1000.0;
+	c->exittime = ((clock() - timer) / 1000.0) + globalcounter;
 	std::cout.precision(2);
 	switch(c->direction){
 		
@@ -104,9 +97,9 @@ void ProcessCar(Car *c){
 
 void GoCarsGo(Intersection *intersection, queue<Car> *a, queue<Car> *b){
 	int carCount = 0;
-	cout << "Opening Intersection at time " << (clock() - timer) / 1000.0 << endl;
-	while((a->size() != 0 || b->size() != 0) && carCount < MAX_CARS_PASSING){
-		usleep(DRIVE_THROUGH_INTERSECTION);	// 3 seconds to get through intersection
+	cout << "Opening Intersection at time " << ((clock() - timer) / 1000.0) + globalcounter << endl;
+	globalcounter += 3.0;
+	while((a->size() != 0 || b->size() != 0) && carCount < MAX_CARS_PASSING){	
 		if(a->size() != 0){
 			Car c1 = a->front();
 			ProcessCar(&c1);
@@ -123,7 +116,8 @@ void GoCarsGo(Intersection *intersection, queue<Car> *a, queue<Car> *b){
 		}
 		carCount++;
 	}
-	cout << "Closing Intersection at time " << (clock() - timer) / 1000.0 << endl;
+	cout << "Closing Intersection at time " << ((clock() - timer) / 1000.0) + globalcounter << endl;
+	usleep(INTERSECTION_SLEEP); // Time needed to switch light
 }
 
 void *ManageIntersection(void*){
@@ -157,84 +151,84 @@ void *ManageIntersection(void*){
 void NorthQueueAddCar(Car *c){
 	northlock.lock();
 	northqueue.push(*c);
-	c->entrytime = (clock() - timer) / 1000.0;
+	c->entrytime = ((clock() - timer) / 1000.0) + globalcounter;
 	northlock.unlock();
-}
-
-void *ManageNorth(void*){
-	for(int i = 0; i < CARS_NORTH; i++){
-		Car c;
-		c.direction = 0;
-		c.id = i;
-		NorthQueueAddCar(&c);
-		std::cout.precision(2);
-		std::cout << "Car " << i << " in North arrived at time " << fixed << c.entrytime << std::endl;
-		usleep(NEW_CAR_SLEEP);
-	}
-	pthread_exit(NULL);
 }
 
 void EastQueueAddCar(Car *c){
 	eastlock.lock();
 	eastqueue.push(*c);
-	c->entrytime = (clock() - timer) / 1000.0;
+	c->entrytime = ((clock() - timer) / 1000.0) + globalcounter;;
 	eastlock.unlock();
-}
-
-void *ManageEast(void*){
-	for(int i = 0; i < CARS_EAST; i++){
-		Car c;
-		c.id = i;
-		c.direction = 1;
-		EastQueueAddCar(&c);
-		std::cout.precision(2);
-		std::cout << "Car " << i << " in East arrived at time " << fixed << c.entrytime << std::endl;
-		usleep(NEW_CAR_SLEEP);
-	}
-	pthread_exit(NULL);
-}
-
-void SouthQueueAddCar(Car *c){
-	southlock.lock();
-	southqueue.push(*c);
-	c->entrytime = (clock() - timer) / 1000.0;
-	southlock.unlock();
-}
-
-void *ManageSouth(void*){
-	for(int i = 0; i < CARS_SOUTH; i++){
-		Car c;
-		c.id = i;
-		c.direction = 2;
-		SouthQueueAddCar(&c);
-		std::cout.precision(2);
-		std::cout << "Car " << i << " in South arrived at time " << fixed << c.entrytime << std::endl;
-		usleep(NEW_CAR_SLEEP);
-	}
-	pthread_exit(NULL);
 }
 
 void WestQueueAddCar(Car *c){
 	westlock.lock();
 	westqueue.push(*c);
-	c->entrytime = (clock() - timer) / 1000.0;
+	c->entrytime = ((clock() - timer) / 1000.0) + globalcounter;;
 	westlock.unlock();
 }
 
+void SouthQueueAddCar(Car *c){
+	southlock.lock();
+	southqueue.push(*c);
+	c->entrytime = ((clock() - timer) / 1000.0) + globalcounter;;
+	southlock.unlock();
+}
+void *ManageNorth(void*){
+	srand(time(NULL));
+	for(int i = 0; i < CARS_NORTH; i++){
+		Car c(i, 0);
+		NorthQueueAddCar(&c);
+		std::cout.precision(2);
+		std::cout << "Car " << i << " in North arrived at time " << fixed << c.entrytime << std::endl;
+		usleep(rand() % NEW_CAR_SLEEP);
+	}
+	pthread_exit(NULL);
+}
+
+
+void *ManageEast(void*){
+	srand(time(NULL));
+	for(int i = 0; i < CARS_EAST; i++){
+		Car c(i, 1);
+		EastQueueAddCar(&c);
+		std::cout.precision(2);
+		std::cout << "Car " << i << " in East arrived at time " << fixed << c.entrytime << std::endl;
+		usleep(rand() % NEW_CAR_SLEEP);
+	}
+	pthread_exit(NULL);
+}
+
+
+
+void *ManageSouth(void*){
+	srand(time(NULL));
+	for(int i = 0; i < CARS_SOUTH; i++){
+		Car c(i, 2);
+		SouthQueueAddCar(&c);
+		std::cout.precision(2);
+		std::cout << "Car " << i << " in South arrived at time " << fixed << c.entrytime << std::endl;
+		usleep(rand() % NEW_CAR_SLEEP);
+	}
+	pthread_exit(NULL);
+}
+
 void *ManageWest(void*){
+	srand(time(NULL));
 	for(int i = 0; i < CARS_WEST; i++){
-		Car c;
-		c.id = i;
-		c.direction = 3;
+		Car c(i, 3);
 		WestQueueAddCar(&c);
 		std::cout.precision(2);
 		std::cout << "Car " << i << " in West arrived at time " << fixed << c.entrytime << std::endl;
-		usleep(NEW_CAR_SLEEP);
+		usleep(rand() % NEW_CAR_SLEEP);
 	}
 	pthread_exit(NULL);
 }
 
 int main(){
+	// Init global counter
+	globalcounter = 0;
 	// Global variables for the intersection thread and each direction thread
 	pthread_t intersectionThread;
 	pthread_t directionThreads[DIRECTIONS];
