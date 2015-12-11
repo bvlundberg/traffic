@@ -62,3 +62,162 @@ Personal notes:
 
 
 -- allow max length between 2 directions pass. Improved time by 33%
+
+lumpy@lumpy:~/Documents/repos/traffic$ ./a.out
+Start at time 0
+Create intersection thread
+Create car threads
+Car 0 in South arrived at time Car 0 in East arrived at time 2.28
+Car 0 in West arrived at time 2.46
+Car 0 in North arrived at time 2.55
+1.89
+Opening Intersection at time 3.13
+Car 0 from the North finised at time 6.77
+Car 0 from the South finised at time 6.87
+Closing Intersection at time 6.97
+Car 1 in East arrived at time 7.24
+Car 1 in West arrived at time 3.67
+Opening Intersection at time 7.78
+Car 0 from the East finised at time  11.02
+Car 0 from the West finised at time  11.25
+Car 1 from the East finised at time  11.38
+Car 1 from the West finised at time  11.69
+Closing Intersection at time 11.80
+Car 1 in South arrived at time 7.92
+Car 1 in North arrived at time 7.85
+Car 2 in East arrived at time 12.44
+Opening Intersection at time 12.58
+Car 1 from the North finised at time 15.75
+Car 1 from the South finised at time 15.84
+Closing Intersection at time 15.95
+Car 2 in West arrived at time 12.64
+Car 3 in East arrived at time 16.28
+Car 2 in South arrived at time 16.55
+Car 4 in East arrived at time 16.85
+Car 2 in North arrived at time 16.71
+Car 3 in West arrived at time 17.07
+Opening Intersection at time 17.17
+Car 3 in North arrived at time 17.25
+Car 2 from the East finised at time  20.79
+Car 3 in South arrived at time 20.87
+Car 4 in North arrived at time 20.98
+Car 2 from the West finised at time  21.41
+Car 3 from the East finised at time  21.48
+Car 3 from the West finised at time  21.55
+Car 4 from the East finised at time  21.63
+Closing Intersection at time 21.70
+Car 5 in East arrived at time 21.96
+Car 4 in West arrived at time 22.11
+Opening Intersection at time 22.21
+Car 2 from the North finised at time 25.37
+Car 5 in West arrived at time 25.68
+Car 2 from the South finised at time 25.57
+Car 6 in West arrived at time 26.92
+Car 6 in East arrived at time 27.10
+Car 3 from the North finised at time 27.32
+Car 3 from the South finised at time 27.40
+Car 4 from the North finised at time 27.47
+Car 7 in East arrived at time 27.55
+Car 7 in West arrived at time 27.82
+Closing Intersection at time 28.07
+Car 8 in East arrived at time 28.44
+Car 5 in North arrived at time 28.58
+Car 4 in South arrived at time 28.71
+Car 6 in North arrived at time 28.82
+Car 9 in East arrived at time 29.00
+Opening Intersection at time 29.11
+Car 5 from the East finised at time  32.30
+Car 4 from the West finised at time  32.38
+Car 7 in North arrived at time 32.52
+Car 5 in South arrived at time 32.60
+Car 6 from the East finised at time  33.01
+Car 8 in North arrived at time 33.13
+Car 5 from the West finised at time  33.34
+Car 7 from the East finised at time  33.45
+Car 6 from the West finised at time  33.52
+Closing Intersection at time 33.59
+Car 9 in North arrived at time 33.92
+Car 10 in East arrived at time 34.04
+Car 8 in West arrived at time 34.16
+Opening Intersection at time 34.38
+Car 5 from the North finised at time 37.48
+Car 4 from the South finised at time 37.52
+Car 6 from the North finised at time 37.56
+Car 5 from the South finised at time 37.59
+Car 7 from the North finised at time 37.63
+Closing Intersection at time 37.66
+Car 9 in West arrived at time 37.81
+Car 11 in East arrived at time 38.02
+Car 6 in South arrived at time 38.25
+Opening Intersection at time 38.12
+Car 7 in South arrived at time 38.45
+Car 8 from the East finised at time  41.68
+Car 7 from the West finised at time  41.75
+Car 9 from the East finised at time  41.82
+Car 8 from the West finised at time  41.89
+Car 10 from the East finised at time  41.96
+Car 9 from the West finised at time  42.03
+Closing Intersection at time 42.12
+Car 8 in South arrived at time 42.48
+Car 10 in North arrived at time 42.69
+Car 12 in East arrived at time 42.83
+Opening Intersection at time 42.94
+Car 8 from the North finised at time 46.03
+Car 6 from the South finised at time 46.27
+Car 10 in West arrived at time 46.40
+Car 9 from the North finised at time 46.59
+Car 7 from the South finised at time 46.72
+Car 10 from the North finised at time 46.82
+Car 8 from the South finised at time 46.90
+Closing Intersection at time 46.97
+Car 11 in West arrived at time 47.21
+Car 13 in East arrived at time 47.56
+Car 11 in North arrived at time 47.91
+Car 9 in South arrived at time 48.06
+Opening Intersection at time 48.17
+Car 11 from the East finised at time  51.38
+Car 10 from the West finised at time  51.44
+Car 12 from the East finised at time  51.52
+Car 11 from the West finised at time  51.59
+Car 13 from the East finised at time  51.66
+Car 10 in South arrived at time 51.87
+Closing Intersection at time 52.05
+Car 12 in North arrived at time 52.23
+Car 11 in South arrived at time 52.33
+Car 14 in East arrived at time 52.67
+Car 12 in West arrived at time 52.80
+Opening Intersection at time 52.91
+Car 11 from the North finised at time 56.07
+Car 13 in West arrived at time 56.18
+Car 9 from the South finised at time 56.41
+Car 12 from the North finised at time 56.55
+Car 10 from the South finised at time 56.66
+Car 11 from the South finised at time 57.17
+Closing Intersection at time 57.26
+Car 14 in West arrived at time 57.45
+Car 13 in North arrived at time 58.03
+Car 12 in South arrived at time 58.19
+Opening Intersection at time 58.29
+Car 14 from the East finised at time  61.38
+Car 12 from the West finised at time  61.44
+Car 13 from the West finised at time  61.51
+Car 14 from the West finised at time  61.58
+Closing Intersection at time 61.65
+Opening Intersection at time 61.89
+Car 13 from the North finised at time 64.96
+Car 12 from the South finised at time 65.00
+Closing Intersection at time 65.03
+Car 14 in North arrived at time 65.35
+Car 13 in South arrived at time 65.49
+Opening Intersection at time 65.58
+Closing Intersection at time 68.63
+Opening Intersection at time 68.83
+Car 14 from the North finised at time 71.94
+Car 13 from the South finised at time 71.97
+Closing Intersection at time 72.01
+Car 14 in South arrived at time 72.37
+Opening Intersection at time 72.90
+Closing Intersection at time 75.96
+Opening Intersection at time 76.51
+Car 14 from the South finised at time 79.58
+Closing Intersection at time 79.61
