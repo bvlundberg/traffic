@@ -1,9 +1,8 @@
 /*	Author: 	Brandon Lundberg
 	Filename:	traffic.cpp
 	Purpose:	Implement a traffic light using multithreading
-	Date: 		2 December 2015
+	Date: 		1 November 2015
 */
-// g++ traffic.cpp -std=c++11 -pthread
 #define NUM_CARS 60
 #define DIRECTIONS 4
 #define CARS_NORTH 15
@@ -29,20 +28,22 @@
 
 using namespace std;
 // Some global variables
+// base timer
 clock_t timer;
+// Timer to account for time it takes for a car to drive through the intersection
 double globalcounter;
+// Lock for each queue
 mutex northlock;
 mutex eastlock;
 mutex southlock;
 mutex westlock;
 
+
 class Intersection{
 	public:
-		int arrivalCount;
-		int passCount;
-		int directionFlag;
-		// 0: North/South
-		// 1: East/West
+		int arrivalCount;	// Cars that arrive
+		int passCount;		// Cars that pass through
+		int directionFlag;	// Direction cars are moving in -  0: North/South, 1: East/West
 
 		Intersection()
 		{
@@ -54,9 +55,9 @@ class Intersection{
 class Car{
 	public:
 		int id;
-		int direction;	// North: 0, East: 1, South:2, West: 3
-		double entrytime;
-		double exittime;
+		int direction;		// North: 0, East: 1, South:2, West: 3
+		double entrytime;	// Time the car arrived at the intersection
+		double exittime;	// Time the car finished driving through the intersection
 	
 		Car(int i, int d)
 		{
@@ -65,11 +66,14 @@ class Car{
 		}
 };
 
+// Queues for each direction
 queue<Car> northqueue;
 queue<Car> eastqueue;
 queue<Car> southqueue;
 queue<Car> westqueue;
 
+// Process Car
+// Sets the time that the car left the intersection and prints the result to the console
 void ProcessCar(Car *c){
 	c->exittime = ((clock() - timer) / 1000.0) + globalcounter;
 	std::cout.precision(2);
@@ -94,7 +98,11 @@ void ProcessCar(Car *c){
 
 	return;
 }
-
+// GoCarsGo
+// Opens the intersection
+// Removes a car (if possible) from the two queues passed in (multiple directions, bonus problem 1)
+// Allows n times (number of passed allowed per green, Bonus problem 1)
+// Closes the intersection
 void GoCarsGo(Intersection *intersection, queue<Car> *a, queue<Car> *b){
 	int carCount = 0;
 	cout << "Opening Intersection at time " << ((clock() - timer) / 1000.0) + globalcounter << endl;
@@ -119,7 +127,10 @@ void GoCarsGo(Intersection *intersection, queue<Car> *a, queue<Car> *b){
 	cout << "Closing Intersection at time " << ((clock() - timer) / 1000.0) + globalcounter << endl;
 	usleep(INTERSECTION_SLEEP); // Time needed to switch light
 }
-
+// Depeding on the current direction allowed to pass, lock the resources needed to manipulate them
+// Call the function to allow cars to pass
+// Release the locks
+// Change the direction for the next light change
 void *ManageIntersection(void*){
 	Intersection intersection;
 	while(intersection.passCount < NUM_CARS){
@@ -147,7 +158,11 @@ void *ManageIntersection(void*){
 	}
 	pthread_exit(NULL);
 }
-//lock(mutex1, mutex2)
+// Add car functions
+// Retrieve lock for queue
+// Add car to queue
+// Update car arrival time
+// Release lock for queue
 void NorthQueueAddCar(Car *c){
 	northlock.lock();
 	northqueue.push(*c);
@@ -175,6 +190,9 @@ void SouthQueueAddCar(Car *c){
 	c->entrytime = ((clock() - timer) / 1000.0) + globalcounter;;
 	southlock.unlock();
 }
+// Manage directions functions
+// Create a car to add to the intersection
+// Sleep a random amount of time before adding another car
 void *ManageNorth(void*){
 	srand(time(NULL));
 	for(int i = 0; i < CARS_NORTH; i++){
@@ -247,5 +265,4 @@ int main(){
 	pthread_create(&directionThreads[3], NULL, &ManageWest, NULL);
 
 	pthread_exit(NULL);
-	// cout << "Ending at time " << (clock() - timer) / 1000.0 << endl;
 }
